@@ -6,9 +6,13 @@ import {div, span, empty} from "core/dom"
 import {repeat} from "core/util/array"
 
 import {Control, ControlView} from "./control"
-
-import {bk_slider_value, bk_slider_title, bk_input_group} from "styles/widgets/sliders"
 import {TickFormatter} from "../formatters/tick_formatter"
+
+import {bk_slider_value, bk_slider_title} from "styles/widgets/sliders"
+import {bk_input_group} from "styles/widgets/inputs"
+
+import nouislider_css from "styles/widgets/nouislider.css"
+import sliders_css from "styles/widgets/sliders.css"
 
 const prefix = 'bk-noUi-'
 
@@ -57,6 +61,10 @@ abstract class AbstractBaseSliderView extends ControlView {
 
     const {show_value} = this.model.properties
     this.on_change([value, title, show_value], () => this._update_title())
+  }
+
+  styles(): string[] {
+    return [...super.styles(), nouislider_css, sliders_css]
   }
 
   _update_title(): void {
