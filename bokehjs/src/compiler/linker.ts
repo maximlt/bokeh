@@ -12,6 +12,7 @@ import {read, write, file_exists, directory_exists, rename, Path} from "./sys"
 import {report_diagnostics} from "./compiler"
 import * as preludes from "./prelude"
 import * as transforms from "./transforms"
+import {BuildError} from "./error"
 
 const root_path = process.cwd()
 
@@ -234,12 +235,12 @@ export class Linker {
 
     for (const entry of this.entries) {
       if (!file_exists(entry))
-        throw new Error(`entry path ${entry} doesn't exist or isn't a file`)
+        throw new BuildError("linker", `entry path ${entry} doesn't exist or isn't a file`)
     }
 
     for (const base of this.bases) {
       if (!directory_exists(base))
-        throw new Error(`base path ${base} doesn't exist or isn't a directory`)
+        throw new BuildError("linker", `base path ${base} doesn't exist or isn't a directory`)
     }
 
     this.cache_path = opts.cache
@@ -495,7 +496,7 @@ export class Linker {
         if (!has_file)
           return pkg_file
         else
-          return new Error(`both ${has_js_file ? js_file : json_file} and ${pkg_file} exist`)
+          return new BuildError("linker", `both ${has_js_file ? js_file : json_file} and ${pkg_file} exist`)
       }
     }
 
@@ -504,7 +505,7 @@ export class Linker {
     else if (has_json_file)
       return json_file
     else
-      return new Error(`can't resolve '${dep}' from '${parent.file}'`)
+      return new BuildError("linker", `can't resolve '${dep}' from '${parent.file}'`)
   }
 
   protected resolve_absolute(dep: string, parent: Parent): Path | Error {
@@ -546,7 +547,7 @@ export class Linker {
       }
     }
 
-    return new Error(`can't resolve '${dep}' from '${parent.file}'`)
+    return new BuildError("linker", `can't resolve '${dep}' from '${parent.file}'`)
   }
 
   resolve_file(dep: string, parent: Parent): Path | Error {
@@ -564,7 +565,7 @@ export class Linker {
   new_module(file: Path): ModuleInfo {
     let source = read(file)
     if (source == null) {
-      throw new Error(`'${file} doesn't exist`)
+      throw new BuildError("linker", `'${file} doesn't exist`)
     }
     const hash = crypto.createHash("sha256").update(source).digest("hex")
     const type = (() => {
@@ -574,7 +575,7 @@ export class Linker {
         case ".mjs": return "js"
         case ".js": return "js"
         default:
-          throw new Error(`unsupported extension of ${file}`)
+          throw new BuildError("linker", `unsupported extension of ${file}`)
       }
     })()
     const [base, base_path, canonical, resolution] = ((): [string, string, string | undefined, ResoType] => {
@@ -597,7 +598,7 @@ export class Linker {
           path = dirname(path)
         }
 
-        throw new Error(`can't resolve package.json for ${root}`)
+        throw new BuildError("linker", `can't resolve package.json for ${root}`)
       }
 
       const path = relative(primary, file)
@@ -618,7 +619,7 @@ export class Linker {
         }
       }
 
-      throw new Error(`${file} is not under any of base paths`)
+      throw new BuildError("linker", `${file} is not under any of base paths`)
     })()
 
     const cached = this.cache.get(file)
@@ -639,7 +640,7 @@ export class Linker {
           const transform = {before: [transforms.collect_imports(imports), transforms.rename_exports()], after: []}
           const {output, error} = transpile(file, source, target, transform)
           if (error)
-            throw new Error(error)
+            throw new BuildError("linker", error)
           else {
             source = output
             collected = [...imports]
@@ -780,7 +781,7 @@ export function minify(module: ModuleInfo, source: string, ecma: terser.ECMA): {
 
   if (error != null) {
     const {message, line, col} = error as any
-    throw new Error(`${module.file}:${line-1}:${col}: ${message}`)
+    throw new BuildError("linker", `${module.file}:${line-1}:${col}: ${message}`)
   }
 
   return {min_source: code || "", min_map: typeof map === "string" ? map : undefined}
