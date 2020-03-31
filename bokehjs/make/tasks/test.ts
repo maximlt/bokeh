@@ -100,10 +100,7 @@ function mocha(files: string[]): Promise<void> {
 }
 
 task("test:codebase:compile", async () => {
-  const success = compile_typescript("./test/codebase/tsconfig.json", {log})
-
-  if (argv.emitError && !success)
-    process.exit(1)
+  compile_typescript("./test/codebase/tsconfig.json")
 })
 
 task("test:size", ["test:codebase:compile"], async () => {
@@ -325,10 +322,7 @@ const start = task2("test:start", [start_headless, start_server], async (devtool
 })
 
 task("test:compile", ["defaults:generate"], async () => {
-  const success = compile_typescript("./test/tsconfig.json", {log})
-
-  if (argv.emitError && !success)
-    process.exit(1)
+  compile_typescript("./test/tsconfig.json")
 })
 
 task("test:bundle", ["test:unit:bundle", "test:integration:bundle"])

@@ -162,9 +162,9 @@ jobs:
         shell: bash
         run: |
           pushd bokehjs
-          node make scripts:compile --emit-error
-          node make test:compile --emit-error
-          PARSER_NO_WATCH=true node make lint --emit-error
+          node make scripts:compile
+          node make test:compile
+          PARSER_NO_WATCH=true node make lint
           popd
 
           py.test --color=yes tests/codebase

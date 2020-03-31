@@ -1,7 +1,7 @@
 import {join} from "path"
 import {argv} from "yargs"
 
-import {task, log} from "../task"
+import {task} from "../task"
 import {rename, write} from "@compiler/sys"
 import {compile_typescript} from "@compiler/compiler"
 import {Linker} from "@compiler/linker"
@@ -19,14 +19,10 @@ task("scripts:version", async () => {
 })
 
 task("scripts:compile", ["styles:compile", "scripts:version"], async () => {
-  const success = compile_typescript(join(paths.src_dir.lib, "tsconfig.json"), {
-    log,
+  compile_typescript(join(paths.src_dir.lib, "tsconfig.json"), {
     out_dir: {js: paths.build_dir.lib, dts: paths.build_dir.types},
     css_dir: paths.build_dir.css,
   })
-
-  if (argv.emitError && !success)
-    process.exit(1)
 })
 
 function min_js(js: string): string {
