@@ -68,7 +68,7 @@ jobs:
       - name: Build BokehJS
         run: |
           pushd bokehjs
-          node make build
+          node make build:all
           popd
           tar czf bokehjs-build.tgz "bokehjs/build"
 
@@ -161,7 +161,7 @@ jobs:
         working-directory: ./bokehjs
         shell: bash
         run: |
-          node make test
+          node make test --no-defaults
 
       - name: Collect results
         if: always()

@@ -315,7 +315,7 @@ const start = task2("test:start", [start_headless, start_server], async (devtool
   return success([devtools_port, server_port] as [number, number])
 })
 
-task("test:compile", [/*"defaults:generate"*/], async () => {
+task("test:compile", argv.defaults === false ? [] : ["defaults:generate"], async () => {
   const success = compile_typescript("./test/tsconfig.json", {log})
 
   if (argv.emitError && !success)
